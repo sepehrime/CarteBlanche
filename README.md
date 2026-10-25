@@ -9,15 +9,13 @@
 ## ✨ Features
 
 - **Interactive Flashcards:** Flip through cards effortlessly to test your recall.
-- **Smart Categorization:** Organize your vocabulary by topic, difficulty, or tense.
+- **Smart Categorization:** Organize your vocabulary by topic, difficulty, or your progress.
 - **Progress Tracking:** Monitor your mastery level over time.
 - **Clean UI/UX:** A distraction-free, modern interface designed for optimal focus.
 
 ## 🛠️ Tech Stack
 
-_(Update this section to match what you use—e.g., Python, JavaScript, SvelteKit, Flask, etc.)_
-
-- **Frontend:** [HTML/CSS/JavaScript / SvelteKit]
+- **Frontend:** [HTML/CSS/JavaScript]
 - **Backend:** [N/A]
 - **Storage:** [Local Storage]
 
@@ -32,6 +30,4 @@ git clone https://github.com/sepehrime/CarteBlanche.git
 # Navigate to the project directory
 cd CarteBlanche
 
-# Install dependencies & run (update commands as needed)
-# python app.py or npm install && npm run dev
 ```
