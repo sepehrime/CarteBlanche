@@ -18,8 +18,8 @@
 _(Update this section to match what you use—e.g., Python, JavaScript, SvelteKit, Flask, etc.)_
 
 - **Frontend:** [HTML/CSS/JavaScript / SvelteKit]
-- **Backend:** [Python / Flask / etc.]
-- **Storage:** [Local Storage / SQLite / etc.]
+- **Backend:** [N/A]
+- **Storage:** [Local Storage]
 
 ## 🚀 Getting Started
 
@@ -27,10 +27,10 @@ Instructions for running the project locally:
 
 ```bash
 # Clone the repository
-git clone [https://github.com/your-username/carte-blanche.git](https://github.com/your-username/carte-blanche.git)
+git clone https://github.com/sepehrime/CarteBlanche.git
 
 # Navigate to the project directory
-cd carte-blanche
+cd CarteBlanche
 
 # Install dependencies & run (update commands as needed)
 # python app.py or npm install && npm run dev
