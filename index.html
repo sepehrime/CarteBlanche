@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Phrases Françaises</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!--APP-->
+    <main class="app">
+      <header class="top">
+        <div class="brand">
+          <h1>Phrases <em>françaises</em></h1>
+          <p>1,000 everyday sentences. Flip, check yourself, keep going.</p>
+        </div>
+        <div class="stats" aria-label="Your progress">
+          <div class="stat known">
+            <b id="statKnown">0</b><span>Known</span>
+          </div>
+          <div class="stat learning">
+            <b id="statLearning">0</b><span>Learning</span>
+          </div>
+          <div class="stat"><b id="statNew">0</b><span>New</span></div>
+        </div>
+      </header>
+
+      <section class="toolbar" aria-label="Filters">
+        <div class="seg" role="group" aria-label="Difficulty">
+          <button type="button" id="lvlAll" data-difficulty="all">
+            All levels
+          </button>
+          <button type="button" id="lvlBeg" data-difficulty="beginner">
+            Beginner
+          </button>
+          <button type="button" id="lvlInt" data-difficulty="intermediate">
+            Intermediate
+          </button>
+          <button type="button" id="lvlAdv" data-difficulty="advanced">
+            Advanced
+          </button>
+        </div>
+        <label class="field"
+          >Topic
+          <select id="contextSelect">
+            <option value="all">All topics</option>
+          </select>
+        </label>
+        <label class="field"
+          >Show
+          <select id="statusSelect">
+            <option value="all">All cards</option>
+            <option value="new">New only</option>
+            <option value="learning">Still learning</option>
+            <option value="known">Known</option>
+          </select>
+        </label>
+        <span class="spacer"></span>
+        <div class="seg" role="group" aria-label="Card direction">
+          <button type="button" id="dirFrEn" data-direction="fr-en">
+            FR → EN
+          </button>
+          <button type="button" id="dirEnFr" data-direction="en-fr">
+            EN → FR
+          </button>
+        </div>
+        <button type="button" class="btn" id="shuffleBtn" aria-pressed="false">
+          ⤮ Shuffle
+        </button>
+      </section>
+
+      <div class="progress">
+        <span id="pos">0 / 0</span>
+        <div class="bar"><i id="bar"></i></div>
+      </div>
+
+      <div id="cardWrap">
+        <div
+          class="card"
+          id="card"
+          role="button"
+          tabindex="0"
+          aria-label="Flashcard"
+        >
+          <div class="card-inner">
+            <div class="face front">
+              <div class="meta">
+                <div id="frontMeta"></div>
+                <span class="lang" id="frontLang">FR</span>
+              </div>
+              <div class="text" id="frontText"></div>
+              <div class="hint">
+                Tap the card or press <kbd>Space</kbd> to reveal
+              </div>
+            </div>
+            <div class="face back">
+              <div class="meta">
+                <div id="backMeta"></div>
+                <span class="lang" id="backLang">EN</span>
+              </div>
+              <div class="text en" id="backText"></div>
+              <div class="sub fr" id="backSub"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty" id="empty" hidden>
+        <h2>No cards here</h2>
+        <p>Nothing matches these filters yet.</p>
+        <button type="button" class="btn" id="showAll">Show all cards</button>
+      </div>
+
+      <div class="controls" id="controls">
+        <button
+          type="button"
+          class="btn prev"
+          id="prevBtn"
+          aria-label="Previous card"
+        >
+          ← Prev
+        </button>
+        <button type="button" class="btn learn" id="learnBtn">
+          Still learning <kbd>L</kbd>
+        </button>
+        <button type="button" class="btn know" id="knowBtn">
+          I know it <kbd>K</kbd>
+        </button>
+        <button
+          type="button"
+          class="btn next"
+          id="nextBtn"
+          aria-label="Next card"
+        >
+          Next →
+        </button>
+      </div>
+
+      <div class="keys">
+        <span><kbd>Space</kbd> flip</span>
+        <span><kbd>←</kbd> <kbd>→</kbd> move</span>
+        <span><kbd>K</kbd> known</span>
+        <span><kbd>L</kbd> still learning</span>
+        <span><kbd>S</kbd> hear French</span>
+      </div>
+
+      <div class="confirm">
+        <button type="button" class="btn" id="resetBtn">Reset progress</button>
+        <span id="confirmReset" hidden
+          >Clear all known and learning marks?
+          <button type="button" class="btn danger" id="confirmYes">
+            Yes, clear
+          </button>
+          <button type="button" class="btn" id="confirmNo">Cancel</button>
+        </span>
+      </div>
+    </main>
+    <!--/APP-->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
