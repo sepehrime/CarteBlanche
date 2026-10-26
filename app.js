@@ -21,13 +21,33 @@
       return {};
     }
   }
+  // Use a saved value only if it is one of the allowed choices.
+  function pick(value, allowed, fallback) {
+    return allowed.indexOf(value) >= 0 ? value : fallback;
+  }
+  function cleanMarks(marks) {
+    var out = {};
+    if (marks && typeof marks === "object") {
+      Object.keys(marks).forEach(function (fr) {
+        if (marks[fr] === "known" || marks[fr] === "learning")
+          out[fr] = marks[fr];
+      });
+    }
+    return out;
+  }
+
   var saved = load();
+  if (!saved || typeof saved !== "object") saved = {};
   var state = {
-    marks: saved.marks || {}, // fr sentence -> "known" | "learning"
-    difficulty: saved.difficulty || "all",
-    context: saved.context || "all",
-    status: saved.status || "all",
-    direction: saved.direction || "fr-en",
+    marks: cleanMarks(saved.marks), // fr sentence -> "known" | "learning"
+    difficulty: pick(
+      saved.difficulty,
+      ["all"].concat(Object.keys(LEVELS)),
+      "all",
+    ),
+    context: typeof saved.context === "string" ? saved.context : "all",
+    status: pick(saved.status, ["all", "new", "learning", "known"], "all"),
+    direction: pick(saved.direction, ["fr-en", "en-fr"], "fr-en"),
     shuffled: !!saved.shuffled,
     order: [],
     index: 0,
@@ -56,6 +76,10 @@
   };
   var el = {
     card: $("card"),
+    frontFace: $("frontFace"),
+    backFace: $("backFace"),
+    frontFlip: $("frontFlip"),
+    backFlip: $("backFlip"),
     cardWrap: $("cardWrap"),
     empty: $("empty"),
     controls: $("controls"),
@@ -216,6 +240,8 @@
 
     var c = current();
     var frFirst = state.direction === "fr-en";
+    // Note focus now: rewriting the card below can drop it.
+    var hadFocus = el.card.contains(document.activeElement);
     el.frontMeta.innerHTML = chips(c);
     el.backMeta.innerHTML = chips(c);
     el.frontLang.innerHTML = frFirst ? "FR " + speakBtn() : "EN";
@@ -227,12 +253,10 @@
     el.backSub.textContent = frFirst ? c.fr : c.en;
     el.backSub.className = "sub" + (frFirst ? " fr" : "");
     el.card.classList.toggle("flipped", state.flipped);
-    el.card.setAttribute(
-      "aria-label",
-      state.flipped
-        ? "Answer side. Press to flip back."
-        : "Question side. Press to reveal the answer.",
-    );
+    // The face turned away is inert: screen readers skip it and it can't take focus.
+    el.frontFace.inert = state.flipped;
+    el.backFace.inert = !state.flipped;
+    if (hadFocus) (state.flipped ? el.backFlip : el.frontFlip).focus();
   }
 
   function flip() {
@@ -293,12 +317,6 @@
     }
     flip();
   });
-  el.card.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      flip();
-    }
-  });
   $("prevBtn").addEventListener("click", function () {
     go(-1);
   });
@@ -350,26 +368,31 @@
     save();
     rebuild();
   });
+  function closeConfirm() {
+    el.confirm.hidden = true;
+    el.reset.hidden = false;
+    el.reset.focus();
+  }
   el.reset.addEventListener("click", function () {
     el.confirm.hidden = false;
     el.reset.hidden = true;
+    el.confirmNo.focus();
   });
-  el.confirmNo.addEventListener("click", function () {
-    el.confirm.hidden = true;
-    el.reset.hidden = false;
-  });
+  el.confirmNo.addEventListener("click", closeConfirm);
   el.confirmYes.addEventListener("click", function () {
     state.marks = {};
     save();
-    el.confirm.hidden = true;
-    el.reset.hidden = false;
     rebuild();
+    closeConfirm();
   });
 
   document.addEventListener("keydown", function (e) {
-    if (e.target.closest && e.target.closest("select, input, textarea")) return;
+    var t = e.target.closest ? e.target : null;
+    if (t && t.closest("select, input, textarea")) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var k = e.key.toLowerCase();
+    // Let Space press a focused button instead of flipping the card.
+    if (k === " " && t && t.closest("button")) return;
     if (k === " ") {
       e.preventDefault();
       flip();

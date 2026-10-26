@@ -31,3 +31,5 @@ git clone https://github.com/sepehrime/CarteBlanche.git
 cd CarteBlanche
 
 ```
+
+Open index.html in any browser

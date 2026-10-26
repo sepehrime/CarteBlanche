@@ -254,6 +254,7 @@ select {
 }
 .face {
   grid-area: 1 / 1;
+  position: relative;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   background: var(--surface);
@@ -265,6 +266,19 @@ select {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+/* Invisible button covering each face, so the card can be flipped with the keyboard. */
+.flip-hit {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.flip-hit:focus-visible {
+  outline-offset: -2px;
 }
 .face.back {
   transform: rotateY(180deg);
@@ -361,6 +375,8 @@ select {
   gap: 6px;
   align-items: center;
   color: var(--muted);
+  position: relative; /* sit above the .flip-hit button */
+  z-index: 1;
 }
 .speak:hover {
   color: var(--accent);
