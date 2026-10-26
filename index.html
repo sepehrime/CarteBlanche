@@ -7,169 +7,392 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Carte Blanche</title>
+    <meta
+      name="description"
+      content="Carte Blanche: learn 1,000 French expressions with a daily round of postcard flashcards, streaks, XP and stamps."
+    />
+    <meta name="application-name" content="Carte Blanche" />
+    <meta name="apple-mobile-web-app-title" content="Carte Blanche" />
+    <meta name="theme-color" content="#4f5bef" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%83%8F%3C/text%3E%3C/svg%3E"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="app">
-      <header class="top">
-        <div class="brand">
-          <h1>Carte <em>Blanche</em></h1>
-          <p>1,000 everyday sentences. Flip, check yourself, keep going.</p>
+    <main class="app" id="app">
+      <!-- Top bar: streak, today's goal, level, settings -->
+      <header class="hud" aria-label="Your progress">
+        <div class="pill streak" id="streakBox">
+          <svg class="flame" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 2c1 3.5 5 6 5 11a5 5 0 0 1-10 0c0-2.2 1-3.8 2.3-5 .2 1.6 1 2.7 2.2 3.2C11 8.6 11 5.3 12 2z"
+            />
+          </svg>
+          <b id="streakNum">0</b>
+          <span class="sr-only" id="streakLabel">day streak</span>
         </div>
-        <div class="stats" aria-label="Your progress">
-          <div class="stat known">
-            <b id="statKnown">0</b><span>Known</span>
-          </div>
-          <div class="stat learning">
-            <b id="statLearning">0</b><span>Learning</span>
-          </div>
-          <div class="stat"><b id="statNew">0</b><span>New</span></div>
+        <div class="pill goal" id="goalBox">
+          <svg class="ring" viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="ring-bg" cx="22" cy="22" r="17" />
+            <circle class="ring-fg" id="goalRing" cx="22" cy="22" r="17" />
+          </svg>
+          <b id="goalNum">0/20</b>
+          <span class="sr-only" id="goalLabel">cards today</span>
         </div>
+        <div class="pill level" id="levelBox">
+          <span class="badge" id="levelNum">1</span>
+          <div class="xpbar"><i id="xpBar"></i></div>
+          <span class="xp-num" id="xpNum" aria-hidden="true"></span>
+        </div>
+        <button
+          type="button"
+          class="icon-btn"
+          id="settingsBtn"
+          aria-label="Settings"
+          aria-haspopup="dialog"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+            <circle cx="16" cy="7" r="2.2" />
+            <circle cx="10" cy="17" r="2.2" />
+          </svg>
+        </button>
       </header>
 
-      <section class="toolbar" aria-label="Filters">
-        <div class="seg" role="group" aria-label="Difficulty">
-          <button type="button" id="lvlAll" data-difficulty="all">
-            All levels
-          </button>
-          <button type="button" id="lvlBeg" data-difficulty="beginner">
-            Beginner
-          </button>
-          <button type="button" id="lvlInt" data-difficulty="intermediate">
-            Intermediate
-          </button>
-          <button type="button" id="lvlAdv" data-difficulty="advanced">
-            Advanced
+      <!-- Play (today's round, or Explore) -->
+      <h1 class="sr-only">Carte Blanche</h1>
+      <section class="screen play" id="playScreen" aria-label="Cards">
+        <div class="filters" id="toolbar" hidden>
+          <label class="sel">
+            <span class="sr-only">Difficulty</span>
+            <select id="difficultySelect">
+              <option value="all">All levels</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </label>
+          <label class="sel">
+            <span class="sr-only">Topic</span>
+            <select id="contextSelect">
+              <option value="all">All topics</option>
+            </select>
+          </label>
+          <label class="sel">
+            <span class="sr-only">Show</span>
+            <select id="statusSelect">
+              <option value="all">All cards</option>
+              <option value="new">New only</option>
+              <option value="learning">Still learning</option>
+              <option value="known">Known</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            class="icon-btn sm"
+            id="shuffleBtn"
+            aria-pressed="false"
+            aria-label="Shuffle"
+            title="Shuffle"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 7h3c4 0 6 10 10 10h4M3 17h3c1.6 0 2.8-1.6 3.9-3.6M14 9.6C15 8.2 16.2 7 18 7h2M17 4l3 3-3 3M17 14l3 3-3 3" />
+            </svg>
           </button>
         </div>
-        <label class="field"
-          >Topic
-          <select id="contextSelect">
-            <option value="all">All topics</option>
-          </select>
-        </label>
-        <label class="field"
-          >Show
-          <select id="statusSelect">
-            <option value="all">All cards</option>
-            <option value="new">New only</option>
-            <option value="learning">Still learning</option>
-            <option value="known">Known</option>
-          </select>
-        </label>
-        <span class="spacer"></span>
-        <div class="seg" role="group" aria-label="Card direction">
-          <button type="button" id="dirFrEn" data-direction="fr-en">
-            FR → EN
-          </button>
-          <button type="button" id="dirEnFr" data-direction="en-fr">
-            EN → FR
-          </button>
+
+        <div class="round">
+          <div class="bar"><i id="bar"></i></div>
+          <span class="pos" id="pos">0 / 0</span>
+          <span class="combo" id="combo" hidden></span>
         </div>
-        <button type="button" class="btn" id="shuffleBtn" aria-pressed="false">
-          ⤮ Shuffle
-        </button>
-      </section>
 
-      <div class="progress">
-        <span id="pos">0 / 0</span>
-        <div class="bar"><i id="bar"></i></div>
-      </div>
-
-      <div id="cardWrap">
-        <div class="card" id="card">
-          <div class="card-inner">
-            <div class="face front" id="frontFace">
-              <button
-                type="button"
-                class="flip-hit"
-                id="frontFlip"
-                aria-label="Question side. Press to reveal the answer."
-              ></button>
-              <div class="meta">
-                <div id="frontMeta"></div>
-                <span class="lang" id="frontLang">FR</span>
+        <div class="card-wrap" id="cardWrap">
+          <div class="card" id="card">
+            <div class="card-inner">
+              <div class="face front" id="frontFace">
+                <button
+                  type="button"
+                  class="flip-hit"
+                  id="frontFlip"
+                  aria-label="Question side. Press to reveal the answer."
+                ></button>
+                <div class="meta">
+                  <div id="frontMeta"></div>
+                  <div class="postage" id="postage"></div>
+                </div>
+                <div class="text" id="frontText"></div>
+                <div class="foot">
+                  <span class="lang" id="frontLang"></span>
+                  <span class="hint">Tap to flip</span>
+                </div>
               </div>
-              <div class="text" id="frontText"></div>
-              <div class="hint">
-                Tap the card or press <kbd>Space</kbd> to reveal
+              <div class="face back" id="backFace" inert>
+                <button
+                  type="button"
+                  class="flip-hit"
+                  id="backFlip"
+                  aria-label="Answer side. Press to flip back."
+                ></button>
+                <div class="meta">
+                  <div id="backMeta"></div>
+                  <div class="postmark" aria-hidden="true">
+                    <span>Paris</span><span id="postDate"></span>
+                  </div>
+                </div>
+                <div class="text en" id="backText"></div>
+                <div class="sub fr" id="backSub"></div>
+                <div class="foot">
+                  <span class="lang" id="backLang"></span>
+                </div>
               </div>
             </div>
-            <div class="face back" id="backFace" inert>
-              <button
-                type="button"
-                class="flip-hit"
-                id="backFlip"
-                aria-label="Answer side. Press to flip back."
-              ></button>
-              <div class="meta">
-                <div id="backMeta"></div>
-                <span class="lang" id="backLang">EN</span>
-              </div>
-              <div class="text en" id="backText"></div>
-              <div class="sub fr" id="backSub"></div>
-            </div>
+            <div class="slam" id="slam" aria-hidden="true"></div>
           </div>
         </div>
-      </div>
 
-      <div class="empty" id="empty" hidden>
-        <h2>No cards here</h2>
-        <p>Nothing matches these filters yet.</p>
-        <button type="button" class="btn" id="showAll">Show all cards</button>
-      </div>
+        <div class="panel done" id="donePanel" hidden>
+          <div class="done-stamp" aria-hidden="true">Objectif</div>
+          <h2 id="doneTitle">À demain !</h2>
+          <p id="doneText"></p>
+          <div class="actions">
+            <button type="button" class="btn3d go" id="moreBtn">
+              Play 10 more
+            </button>
+            <button type="button" class="btn3d plain" id="toExploreBtn">
+              Explore all
+            </button>
+          </div>
+        </div>
 
-      <div class="controls" id="controls">
-        <button
-          type="button"
-          class="btn prev"
-          id="prevBtn"
-          aria-label="Previous card"
-        >
-          ← Prev
-        </button>
-        <button type="button" class="btn learn" id="learnBtn">
-          Still learning <kbd>L</kbd>
-        </button>
-        <button type="button" class="btn know" id="knowBtn">
-          I know it <kbd>K</kbd>
-        </button>
-        <button
-          type="button"
-          class="btn next"
-          id="nextBtn"
-          aria-label="Next card"
-        >
-          Next →
-        </button>
-      </div>
+        <div class="panel done" id="empty" hidden>
+          <h2>No cards here</h2>
+          <p>Nothing matches these filters yet.</p>
+          <div class="actions">
+            <button type="button" class="btn3d plain" id="showAll">
+              Show all cards
+            </button>
+          </div>
+        </div>
 
-      <div class="keys">
-        <span><kbd>Space</kbd> flip</span>
-        <span><kbd>←</kbd> <kbd>→</kbd> move</span>
-        <span><kbd>K</kbd> known</span>
-        <span><kbd>L</kbd> still learning</span>
-        <span><kbd>S</kbd> hear French</span>
-      </div>
-
-      <div class="confirm">
-        <button type="button" class="btn" id="resetBtn">Reset progress</button>
-        <span id="confirmReset" hidden
-          >Clear all known and learning marks?
-          <button type="button" class="btn danger" id="confirmYes">
-            Yes, clear
+        <div class="controls" id="controls">
+          <button
+            type="button"
+            class="btn3d plain nav"
+            id="prevBtn"
+            aria-label="Previous card"
+          >
+            ←
           </button>
-          <button type="button" class="btn" id="confirmNo">Cancel</button>
-        </span>
-      </div>
+          <button type="button" class="btn3d no" id="learnBtn">
+            <span class="ico" aria-hidden="true">↺</span> Again
+            <kbd>L</kbd>
+          </button>
+          <button type="button" class="btn3d go" id="knowBtn">
+            <span class="ico" aria-hidden="true">✓</span> Got it
+            <kbd>K</kbd>
+          </button>
+          <button
+            type="button"
+            class="btn3d plain nav"
+            id="nextBtn"
+            aria-label="Next card"
+          >
+            →
+          </button>
+        </div>
+      </section>
+
+      <!-- Carnet: level, stats, calendar, stamps -->
+      <section
+        class="screen carnet"
+        id="carnetScreen"
+        aria-labelledby="carnetTitle"
+        hidden
+      >
+        <h1 id="carnetTitle">Carnet</h1>
+
+        <div class="level-card">
+          <span class="badge big" id="cLevelNum">1</span>
+          <div class="level-info">
+            <b id="levelTitle">Touriste</b>
+            <span id="levelGloss">tourist</span>
+            <div class="xpbar"><i id="cXpBar"></i></div>
+            <span id="xpText">0 / 100 XP</span>
+          </div>
+        </div>
+
+        <div class="tiles">
+          <div class="tile">
+            <b id="statStreak">0</b><span>Day streak</span>
+          </div>
+          <div class="tile"><b id="statBest">0</b><span>Best streak</span></div>
+          <div class="tile"><b id="statKnown">0</b><span>Phrases known</span></div>
+          <div class="tile">
+            <b id="statStudied">0</b><span>Cards played</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Last 12 weeks</h2>
+          <div class="heat" id="heat"></div>
+          <p class="small" id="heatText"></p>
+        </div>
+
+        <div class="panel pdj">
+          <h2>Phrase of the day</h2>
+          <p class="pdj-fr" id="pdjFr" lang="fr"></p>
+          <p class="small" id="pdjEn"></p>
+          <button type="button" class="speak" id="pdjSpeak" hidden>
+            ▶ Écouter
+          </button>
+        </div>
+
+        <div class="panel">
+          <h2>Stamps <span class="count" id="stampCount"></span></h2>
+          <ul class="stamps" id="stamps"></ul>
+        </div>
+      </section>
+
+      <!-- Bottom tab bar -->
+      <nav class="dock" aria-label="Sections">
+        <button type="button" data-tab="daily">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5.5v13l10-6.5z" />
+          </svg>
+          <span>Play</span>
+        </button>
+        <button type="button" data-tab="explore">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="6" width="12" height="14" rx="2.5" />
+            <path d="M8 3.5h9.5A2.5 2.5 0 0 1 20 6v11" />
+          </svg>
+          <span>Explore</span>
+        </button>
+        <button type="button" data-tab="carnet">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" />
+          </svg>
+          <span>Carnet</span>
+        </button>
+      </nav>
     </main>
-    <!--/APP-->
+
+    <!-- Settings -->
+    <div
+      class="overlay"
+      id="settings"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settingsTitle"
+      hidden
+    >
+      <div class="sheet">
+        <div class="sheet-head">
+          <h2 id="settingsTitle">Settings</h2>
+          <button
+            type="button"
+            class="icon-btn sm"
+            id="settingsClose"
+            aria-label="Close settings"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        <div class="row">
+          <span>Card direction</span>
+          <div class="seg" role="group" aria-label="Card direction">
+            <button type="button" data-direction="fr-en">FR → EN</button>
+            <button type="button" data-direction="en-fr">EN → FR</button>
+          </div>
+        </div>
+        <div class="row">
+          <span>Daily goal</span>
+          <div class="seg" role="group" aria-label="Daily goal">
+            <button type="button" data-goal="10">10</button>
+            <button type="button" data-goal="20">20</button>
+            <button type="button" data-goal="30">30</button>
+            <button type="button" data-goal="50">50</button>
+          </div>
+        </div>
+        <div class="row">
+          <span id="soundLabel">Sound effects</span>
+          <button
+            type="button"
+            class="switch"
+            id="soundBtn"
+            role="switch"
+            aria-checked="true"
+            aria-labelledby="soundLabel"
+          >
+            <i></i>
+          </button>
+        </div>
+        <div class="row keys-row">
+          <span>Keyboard</span>
+          <span class="keys">
+            <kbd>Space</kbd> flip <kbd>K</kbd> got it <kbd>L</kbd> again
+            <kbd>S</kbd> listen
+          </span>
+        </div>
+        <div class="row confirm">
+          <button type="button" class="link-btn" id="resetBtn">
+            Reset all progress
+          </button>
+          <span id="confirmReset" hidden
+            >Clear progress, XP, streaks and stamps?
+            <button type="button" class="link-btn danger" id="confirmYes">
+              Yes, clear
+            </button>
+            <button type="button" class="link-btn" id="confirmNo">
+              Cancel
+            </button>
+          </span>
+        </div>
+        <p class="brand">Carte Blanche</p>
+      </div>
+    </div>
+
+    <!-- Goal celebration -->
+    <div
+      class="overlay celebrate"
+      id="celebrate"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="celTitle"
+      hidden
+    >
+      <div class="cel-card">
+        <div class="cel-stamp" aria-hidden="true">Objectif</div>
+        <h2 id="celTitle">Bravo !</h2>
+        <p id="celText"></p>
+        <dl class="cel-stats" id="celStats"></dl>
+        <div class="actions">
+          <button type="button" class="btn3d go" id="celMore">
+            Keep going
+          </button>
+          <button type="button" class="btn3d plain" id="celDone">
+            Done for today
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+    <div class="sr-only" id="srStatus" aria-live="polite"></div>
+    <div class="floaters" id="floaters" aria-hidden="true"></div>
+    <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+
     <script src="data.js"></script>
     <script src="app.js"></script>
   </body>
